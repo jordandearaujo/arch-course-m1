@@ -3,17 +3,33 @@ package org.example;
 import org.example.core.Conf;
 import org.example.core.Template;
 import org.example.middlewares.LoggerMiddleware;
+import org.example.models.Light;
 import spark.Spark;
 
-import java.util.HashMap;
-
 public class App {
+
+
     public static void main(String[] args) {
         initialize();
 
-        Spark.get("/", (req, res) -> {
-            return Template.render("home.html", new HashMap<>());
-        });
+        HomeSystem homeSystem = HomeSystem.getInstance();
+
+        Light light = new Light();
+        light.setName("Living Room");
+        light.setLightChangeListener(homeSystem);
+        homeSystem.addThing(light);
+
+        Light light2 = new Light();
+        light2.setName("Bed Room");
+        light2.setLightChangeListener(homeSystem);
+        homeSystem.addThing(light2);
+
+        HomeSystemController homeSystemController = new HomeSystemController();
+        ThingController thingController = new ThingController();
+
+        Spark.get("/", homeSystemController::list);
+        Spark.get("/things/:id", thingController::detail);
+
     }
 
     static void initialize() {
